@@ -9,10 +9,37 @@ smelt_length = [9.8, 10.5, 10.6, 11.0, 11.2, 11.3, 11.8, 11.8, 12.0, 12.2, 12.4,
 smelt_weight = [6.7, 7.5, 7.0, 9.7, 9.8, 8.7, 10.0, 9.9, 9.8, 12.2, 13.4, 12.2, 19.7, 19.9]
 
 import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsClassifier
 
 plt.scatter(bream_length, bream_weight)
 plt.scatter(smelt_length, smelt_weight)
 plt.xlabel("length")
-plt.ylabel("wieght")
+plt.ylabel("weight")
 plt.title("Fish data")
-plt.show()
+# plt.show()
+
+length = bream_length + smelt_length # make fish length list
+weight = bream_weight + smelt_weight # make fish weight list
+
+fish_data =[[l, w] for l, w in zip(length, weight)] # combine length and weight data to one
+fish_target = [1]*35 + [0]*14 # make target list
+
+kn = KNeighborsClassifier()
+kn.fit(fish_data, fish_target) # train KNeighbors model
+
+kn.score(fish_data, fish_target) # check how models are accurate
+ans = kn.predict([[30,600]]) # predict unknown value for what it is
+# print(ans)
+
+kn = KNeighborsClassifier()
+kn.fit(fish_data, fish_target)
+
+for n in range(5, 50):
+    kn.n_neighbors = n
+    score = kn.score(fish_data, fish_target)
+
+    if score < 1:
+        print(n, score)
+        break
+
+
