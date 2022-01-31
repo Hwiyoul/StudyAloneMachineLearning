@@ -11,13 +11,37 @@ fish_data = [[l, w] for l, w in zip(fish_length, fish_weight)] # combine fish le
 fish_target = [1]*35 + [0]*14 # 1 means bream and 0 means smelt
 
 from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
 kn = KNeighborsClassifier()
 
-train_input = fish_data[:35]
-train_target = fish_target[:35]
-test_input = fish_data[35:]
-test_target = fish_target[35:]
+# sampling bias test and target set
+# train_input = fish_data[:35]
+# train_target = fish_target[:35]
+# test_input = fish_data[35:]
+# test_target = fish_target[35:]
+#
+# kn = kn.fit(train_input, train_target)
+# kn.score(test_input, test_target)
+# print(kn.score(test_input, test_target))
 
-kn = kn.fit(train_input, train_target)
-kn.score(test_input, test_target)
+input_arr = np.array(fish_data)
+target_arr = np.array(fish_target)
 
+np.random.seed(42)
+index = np.arange(49)
+np.random.shuffle(index)
+
+train_input = input_arr[index[0:35]]
+train_target = target_arr[index[0:35]]
+
+test_input = input_arr[index[35:]]
+test_target = target_arr[index[35:]]
+
+
+import matplotlib.pyplot as plt
+plt.scatter(train_input[:,0], train_input[0:,1])
+plt.scatter(test_input[:,0], test_input[0:,1])
+plt.xlabel('length(in)')
+plt.ylabel('weight(lb)')
+plt.title('Fish length & weight')
+plt.show()
