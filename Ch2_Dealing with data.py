@@ -18,3 +18,6 @@ train_target = fish_target[:35]
 test_input = fish_data[35:]
 test_target = fish_target[35:]
 
+kn = kn.fit(train_input, train_target)
+kn.score(test_input, test_target)
+
