@@ -1,3 +1,8 @@
+# 02-1 Train set and test set
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+import matplotlib as plt
+
 fish_length = [25.4, 26.3, 26.5, 29.0, 29.0, 29.7, 29.7, 30.0, 30.0, 30.7, 31.0, 31.0,
                 31.5, 32.0, 32.0, 32.0, 33.0, 33.0, 33.5, 33.5, 34.0, 34.0, 34.5, 35.0,
                 35.0, 35.0, 35.0, 36.0, 36.0, 37.0, 38.5, 38.5, 39.5, 41.0, 41.0, 9.8,
@@ -10,8 +15,6 @@ fish_weight = [242.0, 290.0, 340.0, 363.0, 430.0, 450.0, 500.0, 390.0, 450.0, 50
 fish_data = [[l, w] for l, w in zip(fish_length, fish_weight)] # combine fish length and fish target list
 fish_target = [1]*35 + [0]*14 # 1 means bream and 0 means smelt
 
-from sklearn.neighbors import KNeighborsClassifier
-import numpy as np
 kn = KNeighborsClassifier()
 
 # sampling bias test and target set
@@ -37,11 +40,16 @@ train_target = target_arr[index[0:35]]
 test_input = input_arr[index[35:]]
 test_target = target_arr[index[35:]]
 
-
-import matplotlib.pyplot as plt
 plt.scatter(train_input[:,0], train_input[0:,1])
 plt.scatter(test_input[:,0], test_input[0:,1])
-plt.xlabel('length(in)')
-plt.ylabel('weight(lb)')
+plt.xlabel('length(cm)')
+plt.ylabel('weight(g)')
 plt.title('Fish length & weight')
 plt.show()
+
+kn = kn.fit(train_input, train_target)
+ans = kn.score(test_input, test_target)
+print(kn.predict([[25,150]]))
+
+# 02-2 Data preprocessing
+fish_data = np.column_stack((fish_length, fish_target))
