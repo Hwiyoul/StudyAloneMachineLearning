@@ -41,5 +41,3 @@ for n in range(5, 50):
     if score < 1:
         print(n, score)
         break
-
-
