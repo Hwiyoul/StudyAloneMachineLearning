@@ -9,6 +9,9 @@ import pandas as pd
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import Lasso
 
 # perch_length = np.array([8.4, 13.7, 15.0, 16.2, 17.4, 18.0, 18.7, 19.0, 19.6, 20.0, 21.0,
 #        21.0, 21.0, 21.3, 22.0, 22.0, 22.0, 22.0, 22.0, 22.5, 22.5, 22.7,
@@ -151,17 +154,17 @@ perch_full = df.to_numpy()
 
 # get perch weight data
 perch_weight = np.array([5.9, 32.0, 40.0, 51.5, 70.0, 100.0, 78.0, 80.0, 85.0, 85.0, 110.0,
-       115.0, 125.0, 130.0, 120.0, 120.0, 130.0, 135.0, 110.0, 130.0,
-       150.0, 145.0, 150.0, 170.0, 225.0, 145.0, 188.0, 180.0, 197.0,
-       218.0, 300.0, 260.0, 265.0, 250.0, 250.0, 300.0, 320.0, 514.0,
-       556.0, 840.0, 685.0, 700.0, 700.0, 690.0, 900.0, 650.0, 820.0,
-       850.0, 900.0, 1015.0, 820.0, 1100.0, 1000.0, 1100.0, 1000.0,
-       1000.0])
+                         115.0, 125.0, 130.0, 120.0, 120.0, 130.0, 135.0, 110.0, 130.0,
+                         150.0, 145.0, 150.0, 170.0, 225.0, 145.0, 188.0, 180.0, 197.0,
+                         218.0, 300.0, 260.0, 265.0, 250.0, 250.0, 300.0, 320.0, 514.0,
+                         556.0, 840.0, 685.0, 700.0, 700.0, 690.0, 900.0, 650.0, 820.0,
+                         850.0, 900.0, 1015.0, 820.0, 1100.0, 1000.0, 1100.0, 1000.0,
+                         1000.0])
 
 # divide given data to train and test set
-train_input, test_input, train_target, test_target = train_test_split(perch_full, perch_weight, random_state = 42)
+train_input, test_input, train_target, test_target = train_test_split(perch_full, perch_weight, random_state=42)
 
-poly = PolynomialFeatures(include_bias = False)
+poly = PolynomialFeatures(include_bias=False)
 poly.fit(train_input)
 train_poly = poly.transform(train_input)
 
@@ -170,7 +173,7 @@ test_poly = poly.transform(test_input)
 lr_poly = LinearRegression()
 lr_poly.fit(train_poly, train_target)
 
-poly = PolynomialFeatures(degree = 5, include_bias = False)
+poly = PolynomialFeatures(degree=5, include_bias=False)
 poly.fit(train_input)
 train_poly5 = poly.transform(train_input)
 test_poly5 = poly.transform(test_input)
@@ -180,3 +183,60 @@ test_poly5 = poly.transform(test_input)
 lr_poly.fit(train_poly5, train_target)
 print(lr_poly.score(train_poly5, train_target))
 print(lr_poly.score(test_poly5, test_target))
+
+ss = StandardScaler()
+ss.fit(train_poly5)
+train_scaled = ss.transform(train_poly5)
+test_scaled = ss.transform(test_poly5)
+
+ridge = Ridge()
+ridge.fit(train_scaled, train_target)
+print("Result from ridge regularization(train) : {0}".format(ridge.score(train_scaled, train_target)))
+print("Result from ridge regularization(test) : {0}".format(ridge.score(test_scaled, test_target)))
+
+train_score = []
+test_score = []
+
+alpha_list = [0.001, 0.01, 0.1, 1, 10, 100]
+for alpha in alpha_list:
+    ridge = Ridge(alpha=alpha)
+    ridge.fit(train_scaled, train_target)
+    train_score.append(ridge.score(train_scaled, train_target))
+    test_score.append(ridge.score(test_scaled, test_target))
+
+# plt.plot(np.log10(alpha_list), train_score)
+# plt.plot(np.log10(alpha_list), test_score)
+# plt.xlabel("length")
+# plt.ylabel("R^2")
+
+ridge = Ridge(alpha=0.1)
+ridge.fit(train_scaled, train_target)
+print("Result from ridge regularization(train) with accurate alpha : {0}".format(ridge.score(train_scaled, train_target)))
+print("Result from ridge regularization(test) with accurate alpha : {0}".format(ridge.score(test_scaled, test_target)))
+
+lasso = Lasso()
+lasso.fit(train_scaled, train_target)
+print("Result from lasso regularization(train) : {0}".format(lasso.score(train_scaled, train_target)))
+print("Result from lasso regularization(test) : {0}".format(lasso.score(test_scaled, test_target)))
+
+train_score = []
+test_score = []
+
+alpha_list = [0.001, 0.01, 0.1, 1, 10, 100]
+for alpha in alpha_list:
+    lasso = Lasso(alpha=alpha, max_iter=10000)
+    lasso.fit(train_scaled, train_target)
+    train_score.append(lasso.score(train_scaled, train_target))
+    test_score.append(lasso.score(test_scaled, test_target))
+
+# plt.plot(np.log10(alpha_list), train_score)
+# plt.plot(np.log10(alpha_list), test_score)
+# plt.xlabel("length")
+# plt.ylabel("R^2")
+
+lasso = Lasso(alpha=1)
+lasso.fit(train_scaled, train_target)
+print("Result from lasso regularization(train) with accurate alpha : {0}".format(ridge.score(train_scaled, train_target)))
+print("Result from lasso regularization(test) with accurate alpha : {0}".format(ridge.score(test_scaled, test_target)))
+
+print(np.sum(lasso.coef_ == 0))
