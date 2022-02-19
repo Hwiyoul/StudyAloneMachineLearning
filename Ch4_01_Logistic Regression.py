@@ -53,3 +53,4 @@ print(np.round(proba, decimals=4))
 # plt.show()
 
 distances, indexes = kn.kneighbors(test_scaled[3:4])
+print(a)
